@@ -1,0 +1,12 @@
+{application, dora,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { dora_app, []}},
+  {env, []}
+ ]}.

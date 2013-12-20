@@ -1,0 +1,3 @@
+-define(DORA_TZ_UTC, utc).
+-define(DORA_TZ_JST, jst).
+-define(DORA_TZ_ECT, ect).
