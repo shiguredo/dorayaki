@@ -2,7 +2,7 @@
 
 REBAR_CONFIG = rebar.config
 
-APP_NAME = dorayaki
+APP_NAME = dora
 
 all: clean deps test
 
@@ -18,19 +18,6 @@ get-deps:
 compile:
 	@./rebar -C $(REBAR_CONFIG) compile skip_deps=true
 	@./rebar -C $(REBAR_CONFIG) xref skip_deps=true
-
-devrel: rel
-	$(foreach dep,$(wildcard deps/*), rm -rf dev/$(APP_NAME)/lib/$(shell basename $(dep))-* && ln -sf $(abspath $(dep)) dev/$(APP_NAME)/lib;)
-	rm -rf dev/$(APP_NAME)/lib/$(APP_NAME)-*
-	rm -rf dev/$(APP_NAME)/lib/$(APP_NAME)
-	mkdir dev/$(APP_NAME)/lib/$(APP_NAME)
-	ln -sf $(abspath ebin) dev/$(APP_NAME)/lib/$(APP_NAME)/ebin
-	ln -sf $(abspath priv) dev/$(APP_NAME)/lib/$(APP_NAME)/priv
-
-rel: compile
-	mkdir -p dev
-	mkdir -p deps
-	(cd rel && rm -rf ../dev/$(APP_NAME) && ../rebar generate target_dir=../dev/$(APP_NAME))
 
 test: compile
 	rm -rf .eunit
