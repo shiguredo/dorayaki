@@ -66,8 +66,8 @@ time_zone(?DORA_TZ_JST) ->
     {9, <<"+09:00">>};
 time_zone(?DORA_TZ_ECT) ->
     {-5, <<"-05:00">>};
-time_zone(_Tz) ->
-    error(not_implemented).
+time_zone(Tz) ->
+    error({not_implemented, Tz}).
 
 
 -spec timestamp() -> #dora_datetime{}.
