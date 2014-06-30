@@ -219,7 +219,7 @@ relativedelta_test() ->
 
 iso8601_test_() ->
     [
-     ?_assertEqual(<<"2013-11-11T23:45:58Z">>, iso8601(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC))),
+     ?_assertEqual(<<"2013-11-11T23:45:58.000000Z">>, iso8601(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"2013-11-11T23:45:58.000001Z">>, iso8601(timestamp({1384, 213558, 1}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"2013-11-12T08:45:58.000001+09:00">>, iso8601(timestamp({1384, 213558, 1}, ?DORA_TZ_JST))),
      ?_assertEqual(<<"2013-11-11T18:45:58.000001-05:00">>, iso8601(timestamp({1384, 213558, 1}, ?DORA_TZ_ECT)))
