@@ -140,11 +140,6 @@ timestamp_to_gregorian_seconds(Timestamp) when is_record(Timestamp, dora_timesta
 
 -spec iso8601(#dora_timestamp{}) -> binary().
 iso8601(#dora_timestamp{year = Year, month = Month, day = Day,
-                        hour = Hour, minute = Minute, second = Second, micro_second = 0,
-                        tz_designator = TzDesignator}) ->
-    list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b~s",
-                                 [Year, Month, Day, Hour, Minute, Second, TzDesignator]));
-iso8601(#dora_timestamp{year = Year, month = Month, day = Day,
                         hour = Hour, minute = Minute, second = Second, micro_second = MicroSecs,
                         tz_designator = TzDesignator}) ->
     list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b.~6.10.0b~s",
@@ -224,7 +219,7 @@ relativedelta_test() ->
 
 iso8601_test_() ->
     [
-     ?_assertEqual(<<"2013-11-11T23:45:58Z">>, iso8601(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC))),
+     ?_assertEqual(<<"2013-11-11T23:45:58.000000Z">>, iso8601(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"2013-11-11T23:45:58.000001Z">>, iso8601(timestamp({1384, 213558, 1}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"2013-11-12T08:45:58.000001+09:00">>, iso8601(timestamp({1384, 213558, 1}, ?DORA_TZ_JST))),
      ?_assertEqual(<<"2013-11-11T18:45:58.000001-05:00">>, iso8601(timestamp({1384, 213558, 1}, ?DORA_TZ_ECT)))
