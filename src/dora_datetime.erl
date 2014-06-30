@@ -140,11 +140,6 @@ timestamp_to_gregorian_seconds(Timestamp) when is_record(Timestamp, dora_timesta
 
 -spec iso8601(#dora_timestamp{}) -> binary().
 iso8601(#dora_timestamp{year = Year, month = Month, day = Day,
-                        hour = Hour, minute = Minute, second = Second, micro_second = 0,
-                        tz_designator = TzDesignator}) ->
-    list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b~s",
-                                 [Year, Month, Day, Hour, Minute, Second, TzDesignator]));
-iso8601(#dora_timestamp{year = Year, month = Month, day = Day,
                         hour = Hour, minute = Minute, second = Second, micro_second = MicroSecs,
                         tz_designator = TzDesignator}) ->
     list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b.~6.10.0b~s",
