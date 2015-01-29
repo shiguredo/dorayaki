@@ -3,6 +3,7 @@
 -export([timestamp/0, timestamp/1, timestamp/2]).
 -export([year/1, month/1, day/1,
          hour/1, minute/1, second/1, micro_second/1, tz_offset/1]).
+-export([timestamp_to_datetime/1, timestamp_to_gregorian_seconds/1]).
 -export([iso8601/1, iso8601_no_millis/1, yyyymmdd/1]).
 -export([relativedelta/2]).
 
