@@ -11,27 +11,43 @@
 -spec validate(atom(), [{key(), type(), required()}]) -> ok | {error, term()}.
 validate(_Applicaiton, []) ->
     ok;
-validate(Application, [{Key, Type, Require}|Rest]) ->
+validate(Application, [{Key, Type, required}|Rest]) ->
     case application:get_env(Application, Key) of
-        undefined when Require =:= required ->
-            %% Key は必須というエラー
+        undefined ->
             {error, {required, Key}};
-        undefined when Require =:= optional ->
-            %% TODO(nakai): ここにデフォルト値をいれる仕組みをつくってもいいかも
-                %% application:set_env/2
+        {ok, Value} ->
+            validate0(Application, Rest, Key, Type, Value)
+    end;
+validate(Application, [{Key, Type, optional}|Rest]) ->
+    case application:get_env(Application, Key) of
+        undefined ->
             validate(Application, Rest);
         {ok, Value} ->
-            case validate_type(Type, Value) of
-                ok ->
-                    validate(Application, Rest);
-                {ok, ConvertValue} ->
-                    %% 変換して戻ってくる可能性もある
-                    ok = application:set_env(Application, Key, ConvertValue),
-                    validate(Application, Rest);
-                badarg ->
-                    {error, {badarg, Key, Type, Value}}
-            end
+            validate0(Application, Rest, Key, Type, Value)
+    end;
+validate(Application, [{Key, Type, optional, Default}|Rest]) ->
+    case application:get_env(Application, Key) of
+        undefined ->
+            %% デフォルトの値は間違っていないという前提
+            ok = application:set_env(Application, Key, Default),
+            validate(Application, Rest);
+        {ok, Value} ->
+            validate0(Application, Rest, Key, Type, Value)
     end.
+
+
+validate0(Application, Rest, Key, Type, Value) ->
+    case validate_type(Type, Value) of
+        ok ->
+            validate(Application, Rest);
+        {ok, ConvertValue} ->
+            %% 変換して戻ってくる可能性もある
+            ok = application:set_env(Application, Key, ConvertValue),
+            validate(Application, Rest);
+        badarg ->
+            {error, {badarg, Key, Type, Value}}
+    end.
+
 
 
 validate_type(string, Value) ->
