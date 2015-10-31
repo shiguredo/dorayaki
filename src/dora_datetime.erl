@@ -96,7 +96,7 @@ timestamp() ->
 
 -spec timestamp(atom()) -> #dora_timestamp{}.
 timestamp(Tz) ->
-    Timestamp = os:timestamp(),
+    Timestamp = erlang:timestamp(),
     timestamp(Timestamp, Tz).
 
 -spec timestamp(erlang:timestamp(), atom()) -> #dora_timestamp{}.
