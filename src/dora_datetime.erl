@@ -3,8 +3,10 @@
 -export([timestamp/0, timestamp/1, timestamp/2]).
 -export([year/1, month/1, day/1,
          hour/1, minute/1, second/1, micro_second/1, tz_offset/1]).
--export([timestamp_to_datetime/1, timestamp_to_gregorian_seconds/1]).
--export([iso8601/1, iso8601_no_micros/1, iso8601_no_millis/1, yyyymmdd/1]).
+-export([timestamp_to_datetime/1, timestamp_to_gregorian_seconds/1,
+         datetime_to_timestamp/1]).
+-export([iso8601/1, iso8601_no_micros/1, iso8601_no_millis/1, yyyymmdd/1,
+         iso8601_to_timestamp/1]).
 -export([relativedelta/2]).
 
 -export_type([month/0, day/0]).
@@ -125,6 +127,15 @@ timestamp_to_datetime(#dora_timestamp{year = Year,
     {{Year, Month, Day}, {Hour, Minute, Second}}.
 
 
+datetime_to_timestamp({{Year, Month, Day}, {Hour, Minute, Second}}) ->
+    #dora_timestamp{year = Year,
+                    month = Month,
+                    day = Day,
+                    hour = Hour,
+                    minute = Minute,
+                    second = Second}.
+
+
 timestamp_to_gregorian_seconds(Timestamp) when is_record(Timestamp, dora_timestamp) ->
     Datetime = timestamp_to_datetime(Timestamp),
     calendar:datetime_to_gregorian_seconds(Datetime).
@@ -155,6 +166,50 @@ iso8601_no_millis(#dora_timestamp{year = Year, month = Month, day = Day,
                                   tz_designator = TzDesignator}) ->
     list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b~s",
                                  [Year, Month, Day, Hour, Minute, Second, TzDesignator])).
+
+
+iso8601_to_timestamp(Binary) ->
+    [Date, TimeAndTz] = binary:split(Binary, <<"T">>),
+    case binary:split(TimeAndTz, <<"Z">>) of
+        [Time, <<>>] ->
+            parse_iso8601_datetime(Date, Time);
+        [TimeAndTz] ->
+            case binary:split(TimeAndTz, <<"+">>) of
+                [Time, <<Hour:2/binary, ":00">> = Tz] ->
+                    Timestamp = parse_iso8601_datetime(Date, Time),
+                    Timestamp#dora_timestamp{tz_offset = binary_to_integer(Hour),
+                                             tz_designator = <<"+", Tz/binary>>};
+                [TimeAndTz] ->
+                    case binary:split(TimeAndTz, <<"-">>) of
+                        [Time, <<Hour:2/binary, ":00">> = Tz] ->
+                            Timestamp = parse_iso8601_datetime(Date, Time),
+                            Timestamp#dora_timestamp{tz_offset = -1 * binary_to_integer(Hour),
+                                                     tz_designator = <<"-", Tz/binary>>};
+                        [Time] ->
+                            parse_iso8601_datetime(Date, Time)
+                    end
+            end
+    end.
+
+parse_iso8601_datetime(Date, Time) ->
+    DateRegExp = <<"^(\\d{4})\-*(\\d{2})\-*(\\d{2})$">>,
+    {match, [YearBin, MonthBin, DayBin]} = re:run(Date, DateRegExp, [{capture, all_but_first, binary}]),
+
+    TimeRegExp = <<"^(\\d{2})\:*(\\d{2})\:*(\\d{2})([\.\,]\\d{6})?$">>,
+    {HourBin, MinuteBin, SecondBin, MicroSecondBin} = case re:run(Time, TimeRegExp, [{capture, all_but_first, binary}]) of
+        {match, [HourBin0, MinuteBin0, SecondBin0]} ->
+            {HourBin0, MinuteBin0, SecondBin0, <<"0">>};
+        {match, [HourBin0, MinuteBin0, SecondBin0, <<_:1/binary, MicroSecondBin0:6/binary>>]} ->
+            {HourBin0, MinuteBin0, SecondBin0, MicroSecondBin0}
+    end,
+
+    #dora_timestamp{year = binary_to_integer(YearBin),
+                    month = binary_to_integer(MonthBin),
+                    day = binary_to_integer(DayBin),
+                    hour = binary_to_integer(HourBin),
+                    minute = binary_to_integer(MinuteBin),
+                    second = binary_to_integer(SecondBin),
+                    micro_second = binary_to_integer(MicroSecondBin)}.
 
 
 -spec yyyymmdd(calendar:date() | #dora_timestamp{}) -> binary().
