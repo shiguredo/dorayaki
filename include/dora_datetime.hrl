@@ -11,8 +11,6 @@
           minute :: 0..59,
           second :: 0..59,
           micro_second :: 0..999999,
-          tz_offset = 0 :: non_neg_integer(),
+          tz_offset = 0 :: integer(),
           tz_designator = <<"Z">> :: binary()
          }).
-
-
