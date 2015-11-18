@@ -168,6 +168,7 @@ iso8601_no_millis(#dora_timestamp{year = Year, month = Month, day = Day,
                                  [Year, Month, Day, Hour, Minute, Second, TzDesignator])).
 
 
+%% XXX(shimazaki): Cannot parse milliseconds now
 -spec iso8601_to_timestamp(binary()) -> #dora_timestamp{}.
 iso8601_to_timestamp(Binary) ->
     [Date, TimeAndTz] = binary:split(Binary, <<"T">>),
