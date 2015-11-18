@@ -93,10 +93,13 @@ iso8601_no_millis_test_() ->
 
 iso8601_to_timestamp_test_() ->
     [
+     ?_assertEqual(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58.000000">>)),
+     ?_assertEqual(timestamp({1384, 213558, 1}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58.000001">>)),
      ?_assertEqual(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58.000000Z">>)),
      ?_assertEqual(timestamp({1384, 213558, 1}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58.000001Z">>)),
      ?_assertEqual(timestamp({1384, 213558, 1}, ?DORA_TZ_JST), iso8601_to_timestamp(<<"2013-11-12T08:45:58.000001+09:00">>)),
      ?_assertEqual(timestamp({1384, 213558, 1}, ?DORA_TZ_ECT), iso8601_to_timestamp(<<"2013-11-11T18:45:58.000001-05:00">>)),
+     ?_assertEqual(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58">>)),
      ?_assertEqual(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58Z">>)),
      ?_assertEqual(timestamp({1384, 213558, 0}, ?DORA_TZ_UTC), iso8601_to_timestamp(<<"2013-11-11T23:45:58Z">>)),
      ?_assertEqual(timestamp({1384, 213558, 0}, ?DORA_TZ_JST), iso8601_to_timestamp(<<"2013-11-12T08:45:58+09:00">>)),
