@@ -179,7 +179,7 @@ iso8601_to_timestamp(Binary) ->
         {match, [HourBin0, MinuteBin0, SecondBin0, <<>>, Tz0]} ->
             {HourBin0, MinuteBin0, SecondBin0, <<"0">>, Tz0};
         {match, [HourBin0, MinuteBin0, SecondBin0, <<_:1/binary, MilliSecondBin0:3/binary>>, Tz0]} ->
-            {HourBin0, MinuteBin0, SecondBin0, MilliSecondBin0, Tz0};
+            {HourBin0, MinuteBin0, SecondBin0, <<MilliSecondBin0/binary, "000">>, Tz0};
         {match, [HourBin0, MinuteBin0, SecondBin0, <<_:1/binary, MicroSecondBin0:6/binary>>, Tz0]} ->
             {HourBin0, MinuteBin0, SecondBin0, MicroSecondBin0, Tz0}
     end,
