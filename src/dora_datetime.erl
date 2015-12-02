@@ -168,17 +168,18 @@ iso8601_no_millis(#dora_timestamp{year = Year, month = Month, day = Day,
                                  [Year, Month, Day, Hour, Minute, Second, TzDesignator])).
 
 
-%% XXX(shimazaki): Cannot parse milliseconds now
 -spec iso8601_to_timestamp(binary()) -> #dora_timestamp{}.
 iso8601_to_timestamp(Binary) ->
     [Date, TimeAndTz] = binary:split(Binary, <<"T">>),
     DateRegExp = <<"^(\\d{4})\-*(\\d{2})\-*(\\d{2})$">>,
     {match, [YearBin, MonthBin, DayBin]} = re:run(Date, DateRegExp, [{capture, all_but_first, binary}]),
 
-    TimeRegExp = <<"^(\\d{2})\:*(\\d{2})\:*(\\d{2})([\.\,]\\d{6})?(\.*)$">>,
+    TimeRegExp = <<"^(\\d{2})\:*(\\d{2})\:*(\\d{2})([\.\,]\\d{3,6})?(\.*)$">>,
     {HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz} = case re:run(TimeAndTz, TimeRegExp, [{capture, all_but_first, binary}]) of
         {match, [HourBin0, MinuteBin0, SecondBin0, <<>>, Tz0]} ->
             {HourBin0, MinuteBin0, SecondBin0, <<"0">>, Tz0};
+        {match, [HourBin0, MinuteBin0, SecondBin0, <<_:1/binary, MilliSecondBin0:3/binary>>, Tz0]} ->
+            {HourBin0, MinuteBin0, SecondBin0, <<MilliSecondBin0/binary, "000">>, Tz0};
         {match, [HourBin0, MinuteBin0, SecondBin0, <<_:1/binary, MicroSecondBin0:6/binary>>, Tz0]} ->
             {HourBin0, MinuteBin0, SecondBin0, MicroSecondBin0, Tz0}
     end,
