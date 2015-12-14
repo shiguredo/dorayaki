@@ -202,12 +202,14 @@ iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, M
             Timestamp;
         <<"Z">> ->
             Timestamp;
-        <<"+", Hour:2/binary, ":00">> ->
+        <<"+", Hour:2/binary, _Rest/binary>> ->
+            %% TODO(shimazaki): Rest が "00" か ":00" であることを確認する
             Timestamp#dora_timestamp{tz_offset = binary_to_integer(Hour),
-                                     tz_designator = Tz};
-        <<"-", Hour:2/binary, ":00">> ->
+                                     tz_designator = <<"+", Hour/binary, ":00">>};
+        <<"-", Hour:2/binary, _Rest/binary>> ->
+            %% TODO(shimazaki): Rest が "00" か ":00" であることを確認する
             Timestamp#dora_timestamp{tz_offset = -1 * binary_to_integer(Hour),
-                                     tz_designator = Tz}
+                                     tz_designator = <<"-", Hour/binary, ":00">>}
     end.
 
 
