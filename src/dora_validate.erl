@@ -65,7 +65,7 @@ validate_type(boolean, Value) ->
 
 
 validate_port_number(Value) ->
-    validate_integer(Value, 0, 655535).
+    validate_integer(Value, 0, 65535).
 
 
 validate_boolean(true) ->
