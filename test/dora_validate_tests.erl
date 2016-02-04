@@ -48,3 +48,43 @@ validate_type_ipv4_address_test() ->
                  application:unset_env(dorayaki, ip_address)),
     ok.
 
+
+validate_type_port_number_test() ->
+    %% optional
+    ?assertEqual(ok,
+        validate(dorayaki, [{port_number, port_number, optional}])),
+    ?assertEqual(undefined,
+        application:get_env(dorayaki, port_number)),
+
+    %% optional default
+    ?assertEqual(ok,
+        validate(dorayaki, [{port_number, port_number, optional, 1}])),
+    ?assertEqual({ok, 1},
+        application:get_env(dorayaki, port_number)),
+
+    application:set_env(dorayaki, port_number, 1),
+    ?assertEqual(ok,
+        validate(dorayaki, [{port_number, port_number, required}])),
+
+    application:set_env(dorayaki, port_number, 65535),
+    ?assertEqual(ok,
+        validate(dorayaki, [{port_number, port_number, required}])),
+
+    %% bad range
+    application:set_env(dorayaki, port_number, -1),
+    ?assertEqual({error, {badarg, port_number, port_number, -1}},
+        validate(dorayaki, [{port_number, port_number, required}])),
+
+    application:set_env(dorayaki, port_number, 65536),
+    ?assertEqual({error, {badarg, port_number, port_number, 65536}},
+        validate(dorayaki, [{port_number, port_number, required}])),
+
+    %% bad type
+    application:set_env(dorayaki, port_number, "abc"),
+    ?assertEqual({error, {badarg, port_number, port_number, "abc"}},
+        validate(dorayaki, [{port_number, port_number, required}])),
+
+    ?assertEqual(ok,
+        application:unset_env(dorayaki, port_number)),
+    ok.
+
