@@ -182,8 +182,8 @@ iso8601_to_timestamp(Binary) ->
                     {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<MilliSecondBin/binary, "000">>, Tz)};
                 {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:6/binary>>, Tz]} ->
                     {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
-                nomatch ->
-                    {error, unsupported_format}
+                _ ->
+                    {error, {unsupported_format, TimeAndTz}}
             end;
         nomatch ->
             {error, unsupported_format}
