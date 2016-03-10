@@ -1,35 +1,24 @@
-.PHONY: all compile deps clean test devrel rel
-
-REBAR_CONFIG = rebar.config
+.PHONY: all compile test clean distclean
 
 APP_NAME = dora
 
 all: clean deps test
 
-deps: get-deps update-deps
-	@./rebar -C $(REBAR_CONFIG) compile
-
-update-deps:
-	@./rebar -C $(REBAR_CONFIG) update-deps
-
-get-deps:
-	@./rebar -C $(REBAR_CONFIG) get-deps
+deps:
+	@./rebar3 compile
 
 compile:
-	@./rebar -C $(REBAR_CONFIG) compile skip_deps=true
-	@./rebar -C $(REBAR_CONFIG) xref skip_deps=true
+	@./rebar3 do xref
 
 test: compile
-	rm -rf .eunit
-	@./rebar -C $(REBAR_CONFIG) eunit skip_deps=true
+	@./rebar3 as test eunit
 
 clean:
-	@./rebar -C $(REBAR_CONFIG) clean skip_deps=true
+	@./rebar3 clean
 
 distclean: clean
-	@./rebar -C $(REBAR_CONFIG) clean
-	@./rebar -C $(REBAR_CONFIG) delete-deps
 	rm -rf dev
+	@./rebar3 clean --all
 
 dialyze-init:
 	dialyzer --build_plt --apps erts kernel stdlib mnesia crypto public_key snmp reltool

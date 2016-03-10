@@ -1,4 +1,4 @@
-deps/*
+_build/*
 ebin/*
 .qc/*
 .eunit/*
