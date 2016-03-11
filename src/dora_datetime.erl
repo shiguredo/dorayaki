@@ -180,6 +180,10 @@ iso8601_to_timestamp(Binary) ->
                     {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<"0">>, Tz)};
                 {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MilliSecondBin:3/binary>>, Tz]} ->
                     {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<MilliSecondBin/binary, "000">>, Tz)};
+                {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:4/binary>>, Tz]} ->
+                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:5/binary>>, Tz]} ->
+                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
                 {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:6/binary>>, Tz]} ->
                     {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
                 _ ->
