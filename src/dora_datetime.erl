@@ -170,28 +170,33 @@ iso8601_no_millis(#dora_timestamp{year = Year, month = Month, day = Day,
 
 -spec iso8601_to_timestamp(binary()) -> {ok, #dora_timestamp{}} | {error, unsupported_format}.
 iso8601_to_timestamp(Binary) ->
-    [Date, TimeAndTz] = binary:split(Binary, <<"T">>),
-    DateRegExp = <<"^(\\d{4})\-*(\\d{2})\-*(\\d{2})$">>,
-    case re:run(Date, DateRegExp, [{capture, all_but_first, binary}]) of
-        {match, [YearBin, MonthBin, DayBin]} ->
-            TimeRegExp = <<"^(\\d{2})\:*(\\d{2})\:*(\\d{2})([\.\,]\\d{3,6})?(\.*)$">>,
-            case re:run(TimeAndTz, TimeRegExp, [{capture, all_but_first, binary}]) of
-                {match, [HourBin, MinuteBin, SecondBin, <<>>, Tz]} ->
-                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<"0">>, Tz)};
-                {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MilliSecondBin:3/binary>>, Tz]} ->
-                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<MilliSecondBin/binary, "000">>, Tz)};
-                {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:4/binary>>, Tz]} ->
-                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
-                {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:5/binary>>, Tz]} ->
-                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
-                {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:6/binary>>, Tz]} ->
-                    {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+    case binary:split(Binary, <<"T">>) of
+        [Date, TimeAndTz] ->
+            DateRegExp = <<"^(\\d{4})\-*(\\d{2})\-*(\\d{2})$">>,
+            case re:run(Date, DateRegExp, [{capture, all_but_first, binary}]) of
+                {match, [YearBin, MonthBin, DayBin]} ->
+                    TimeRegExp = <<"^(\\d{2})\:*(\\d{2})\:*(\\d{2})([\.\,]\\d{3,6})?(\.*)$">>,
+                    case re:run(TimeAndTz, TimeRegExp, [{capture, all_but_first, binary}]) of
+                        {match, [HourBin, MinuteBin, SecondBin, <<>>, Tz]} ->
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<"0">>, Tz)};
+                        {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MilliSecondBin:3/binary>>, Tz]} ->
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<MilliSecondBin/binary, "000">>, Tz)};
+                        {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:4/binary>>, Tz]} ->
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                        {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:5/binary>>, Tz]} ->
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                        {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:6/binary>>, Tz]} ->
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                        _ ->
+                            {error, {unsupported_time_format, TimeAndTz}}
+                    end;
                 _ ->
-                    {error, {unsupported_format, TimeAndTz}}
+                    {error, {unsupported_date_format, Date}}
             end;
         _ ->
-            {error, {unsupported_format, Date}}
+            {error, {unsupported_format, Binary}}
     end.
+
 
 iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz) ->
     Timestamp = #dora_timestamp{year = binary_to_integer(YearBin),
