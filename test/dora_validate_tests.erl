@@ -10,8 +10,8 @@ validate_type_host_test() ->
     ?assertEqual(ok,
                  validate(dorayaki, [{ip_address, host, required}])),
 
-    application:set_env(dorayaki, ip_address, "abc"),
-    ?assertEqual({error, {badarg, ip_address, host, "abc"}},
+    application:set_env(dorayaki, ip_address, "dorayaki"),
+    ?assertEqual({error, {badarg, ip_address, host, "dorayaki"}},
                  validate(dorayaki, [{ip_address, host, required}])),
 
     ?assertEqual(ok,
