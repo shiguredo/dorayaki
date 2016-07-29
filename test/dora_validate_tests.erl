@@ -10,8 +10,8 @@ validate_type_host_test() ->
     ?assertEqual(ok,
                  validate(dorayaki, [{ip_address, host, required}])),
 
-    application:set_env(dorayaki, ip_address, "abc"),
-    ?assertEqual({error, {badarg, ip_address, host, "abc"}},
+    application:set_env(dorayaki, ip_address, "dorayaki"),
+    ?assertEqual({error, {badarg, ip_address, host, "dorayaki"}},
                  validate(dorayaki, [{ip_address, host, required}])),
 
     ?assertEqual(ok,
@@ -87,4 +87,78 @@ validate_type_port_number_test() ->
     ?assertEqual(ok,
         application:unset_env(dorayaki, port_number)),
     ok.
+
+
+validate_type_http_uri_test() ->
+    %% optional
+    ?assertEqual(ok,
+        validate(dorayaki, [{webhook_url, http_uri, optional}])),
+    ?assertEqual(undefined,
+        application:get_env(dorayaki, webhook_url)),
+
+    %% optional default
+    ?assertEqual(ok,
+        validate(dorayaki, [{webhook_url, http_uri, optional, []}])),
+    ?assertEqual({ok, []},
+        application:get_env(dorayaki, webhook_url)),
+
+    %% https://
+    application:set_env(dorayaki, webhook_url, "http://example.com"),
+    ?assertEqual(ok,
+        validate(dorayaki, [{webhook_url, http_uri, required}])),
+
+    %% http://
+    application:set_env(dorayaki, webhoo_url, "https//google.com"),
+    ?assertEqual(ok,
+        validate(dorayaki, [{webhook_url, http_uri, required}])),
+
+    %% bad uri
+    application:set_env(dorayaki, webhook_url, "ntp://example.com"),
+    ?assertEqual({error, {badarg, webhook_url, http_uri, "ntp://example.com"}},
+        validate(dorayaki, [{webhook_url, http_uri, required}])),
+
+    %% bad type
+    application:set_env(dorayaki, webhook_url, 1),
+    ?assertEqual({error, {unknown_type, webhook_url, http_url, 1}},
+                 %% http_ur*l*
+        validate(dorayaki, [{webhook_url, http_url, required}])),
+
+    ?assertEqual(ok,
+        application:unset_env(dorayaki, webhook_url)),
+    ok.
+
+
+validate_type_list_list_http_uri_test() ->
+    %% optional
+    ?assertEqual(ok,
+        validate(dorayaki, [{server_urls, list_http_uri, optional}])),
+    ?assertEqual(undefined,
+        application:get_env(dorayaki, server_urls)),
+
+    %% https://
+    application:set_env(dorayaki, server_urls, ["http://example.com"]),
+    ?assertEqual(ok,
+        validate(dorayaki, [{server_urls, list_http_uri, required}])),
+
+    %% http://
+    application:set_env(dorayaki, webhoo_url, ["https//google.com"]),
+    ?assertEqual(ok,
+        validate(dorayaki, [{server_urls, list_http_uri, required}])),
+
+    %% bad uri
+    application:set_env(dorayaki, server_urls, ["ntp://example.com"]),
+    ?assertEqual({error, {badarg, server_urls, list_http_uri, ["ntp://example.com"]}},
+        validate(dorayaki, [{server_urls, list_http_uri, required}])),
+
+    %% bad type
+    application:set_env(dorayaki, server_urls, 1),
+    ?assertEqual({error, {unknown_type, server_urls, http_url, 1}},
+                 %% http_ur*l*
+        validate(dorayaki, [{server_urls, http_url, required}])),
+
+    ?assertEqual(ok,
+        application:unset_env(dorayaki, server_urls)),
+    ok.
+
+
 
