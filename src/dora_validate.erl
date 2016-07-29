@@ -116,6 +116,9 @@ validate_string(_Value) ->
     badarg.
 
 
+-include_lib("eunit/include/eunit.hrl").
+
+
 validate_http_uri(Value) ->
     case http_uri:parse(Value) of
         {ok, _Result} ->
@@ -129,7 +132,7 @@ validate_http_uri(Value) ->
     %% まずは空を許可する仕組みで作る
 validate_list_http_uri([]) ->
     ok;
-validate_list_http_uri([Value|Rest]) when is_list(Value) ->
+validate_list_http_uri([Value|Rest]) ->
     case validate_http_uri(Value) of
         ok ->
             validate_list_http_uri(Rest);
