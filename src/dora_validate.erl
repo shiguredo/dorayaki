@@ -55,8 +55,10 @@ validate_type({integer, Min, Max}, Value) ->
     validate_integer(Value, Min, Max);
 validate_type(ipv4_address, Value) ->
     validate_ipv4_address(Value);
-validate_type(host, Value) ->
-    validate_host(Value);
+validate_type(ipv4_address_and_port_number, Value) ->
+    validate_ipv4_address_and_port_number(Value);
+validate_type(list_ipv4_address_and_port_number, Value) ->
+    validate_list_ipv4_address_and_port_number(Value);
 validate_type(port_number, Value) ->
     validate_port_number(Value);
 validate_type(boolean, Value) ->
@@ -100,11 +102,42 @@ validate_ipv4_address(Value) ->
     end.
 
 
-validate_host(Value) ->
-    case net_adm:dns_hostname(Value) of
-        {ok, _Hostname} ->
-            ok;
-        {error, _Reason} ->
+validate_ipv4_address_and_port_number(Value) when is_list(Value) ->
+    validate_ipv4_address_and_port_number(list_to_binary(Value));
+validate_ipv4_address_and_port_number(Value) when is_binary(Value) ->
+    case binary:split(Value, <<":">>) of
+        [RawIPAddress, RawPort] ->
+            case inet_parse:ipv4strict_address(binary_to_list(RawIPAddress)) of
+                {ok, IPAddress} ->
+                    try binary_to_integer(RawPort) of
+                        Port when 0 =< Port andalso Port =< 65535 ->
+                            {ok, {IPAddress, Port}};
+                        _ ->
+                            badarg
+                    catch
+                        _:_ ->
+                            badarg
+                    end;
+                {error, _Reason} ->
+                    badarg
+            end;
+        _ ->
+            badarg
+    end;
+validate_ipv4_address_and_port_number(_Value) ->
+    badarg.
+
+
+validate_list_ipv4_address_and_port_number(Value) ->
+    validate_list_ipv4_address_and_port_number(Value, []).
+
+validate_list_ipv4_address_and_port_number([], Acc) ->
+    {ok, lists:reverse(Acc)};
+validate_list_ipv4_address_and_port_number([Value|Rest], Acc) ->
+    case validate_ipv4_address_and_port_number(Value) of
+        {ok, Host} ->
+            validate_list_ipv4_address_and_port_number(Rest, [Host|Acc]);
+        _ ->
             badarg
     end.
 
