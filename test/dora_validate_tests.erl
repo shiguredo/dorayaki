@@ -5,14 +5,28 @@
 -include_lib("eunit/include/eunit.hrl").
 
 
-validate_type_host_test() ->
-    application:set_env(dorayaki, ip_address, "127.0.0.1"),
+validate_type_ipv4_address_and_port_number_test() ->
+    application:set_env(dorayaki, node, "127.0.0.1:5000"),
     ?assertEqual(ok,
-                 validate(dorayaki, [{ip_address, host, required}])),
+                 validate(dorayaki, [{node, ipv4_address_and_port_number, required}])),
 
-    application:set_env(dorayaki, ip_address, "dorayaki"),
-    ?assertEqual({error, {badarg, ip_address, host, "dorayaki"}},
-                 validate(dorayaki, [{ip_address, host, required}])),
+    application:set_env(dorayaki, node, "dorayaki"),
+    ?assertEqual({error, {badarg, node, ipv4_address_and_port_number, "dorayaki"}},
+                 validate(dorayaki, [{node, ipv4_address_and_port_number, required}])),
+
+    ?assertEqual(ok,
+                 application:unset_env(dorayaki, ip_address)),
+    ok.
+
+
+validate_type_list_ipv4_address_and_port_number_test() ->
+    application:set_env(dorayaki, node_list, ["192.0.2.1:5000", "192.0.2.2:5000"]),
+    ?assertEqual(ok,
+                 validate(dorayaki, [{node_list, list_ipv4_address_and_port_number, required}])),
+
+    application:set_env(dorayaki, node_list, ["dorayaki", "192.0.2.1:5000"]),
+    ?assertEqual({error, {badarg, node_list, list_ipv4_address_and_port_number, ["dorayaki", "192.0.2.1:5000"]}},
+                 validate(dorayaki, [{node_list, list_ipv4_address_and_port_number, required}])),
 
     ?assertEqual(ok,
                  application:unset_env(dorayaki, ip_address)),
