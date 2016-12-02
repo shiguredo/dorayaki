@@ -9,7 +9,8 @@
                         hour/1, minute/1, second/1, micro_second/1, tz_offset/1,
                         iso8601/1, iso8601_no_micros/1, iso8601_no_millis/1, yyyymmdd/1,
                         iso8601_to_timestamp/1,
-                        relativedelta/2]).
+                        relativedelta/2,
+                        posix_time_to_iso8601/1]).
 
 
 timestamp_test() ->
@@ -128,4 +129,12 @@ yyyymmdd_test_() ->
     [
      ?_assertEqual(<<"20131111">>, yyyymmdd(timestamp({1384, 213558, 1}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"20131112">>, yyyymmdd(timestamp({1384, 213558, 1}, ?DORA_TZ_JST)))
+    ].
+
+
+
+posix_time_to_iso8601_test_() ->
+    [
+     ?_assertEqual(<<"1998-12-31T23:59:59Z">>, posix_time_to_iso8601(915148799)),
+     ?_assertEqual(<<"2038-01-19T03:14:07Z">>, posix_time_to_iso8601(2147483647))
     ].
