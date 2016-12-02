@@ -9,6 +9,8 @@
          iso8601_to_timestamp/1]).
 -export([relativedelta/2]).
 
+-export([posix_time_to_iso8601/1]).
+
 -export_type([month/0, day/0]).
 
 -include("dora_datetime.hrl").
@@ -225,3 +227,14 @@ iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, M
 -spec yyyymmdd(calendar:date() | #dora_timestamp{}) -> binary().
 yyyymmdd(#dora_timestamp{year = Year, month = Month, day = Day}) ->
     list_to_binary(io_lib:format("~4.10.0b~2.10.0b~2.10.0b", [Year, Month, Day])).
+
+
+
+posix_time_to_iso8601(PosixTime) ->
+    GregorianSeconds = calendar:datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}}) + PosixTime,
+    Datetime = calendar:gregorian_seconds_to_datetime(GregorianSeconds),
+    Timestamp = datetime_to_timestamp(Datetime),
+    iso8601_no_millis(Timestamp).
+
+
+
