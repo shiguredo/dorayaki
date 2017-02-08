@@ -80,6 +80,7 @@ iso8601_no_micros_test_() ->
     [
      ?_assertEqual(<<"2013-11-11T23:45:58.123Z">>, iso8601_no_micros(timestamp({1384, 213558, 123456}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"2013-11-11T23:45:58.123Z">>, iso8601_no_micros(timestamp({1384, 213558, 123456}, ?DORA_TZ_UTC))),
+     ?_assertEqual(<<"2013-11-11T23:45:58.000Z">>, iso8601_no_micros(timestamp({1384, 213558, 1000000}, ?DORA_TZ_UTC))),
      ?_assertEqual(<<"2013-11-12T08:45:58.123+09:00">>, iso8601_no_micros(timestamp({1384, 213558, 123456}, ?DORA_TZ_JST))),
      ?_assertEqual(<<"2013-11-11T18:45:58.123-05:00">>, iso8601_no_micros(timestamp({1384, 213558, 123456}, ?DORA_TZ_ECT)))
     ].
