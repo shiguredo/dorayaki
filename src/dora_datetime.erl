@@ -157,7 +157,7 @@ iso8601_no_micros(#dora_timestamp{
                      micro_second = MicroSecs,
                      tz_designator = TzDesignator
                     }) ->
-    Milli = erlang:round(MicroSecs / 1000),
+    Milli = erlang:round(MicroSecs / 1000) rem 1000,
     list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b.~3.10.0b~s",
                                  [Year, Month, Day, Hour, Minute, Second, Milli, TzDesignator])).
 
