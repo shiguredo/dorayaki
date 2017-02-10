@@ -63,6 +63,28 @@ validate_type_ipv4_address_test() ->
     ok.
 
 
+validate_type_ipv6_address_test() ->
+    %% optional
+    ?assertEqual(ok,
+                 validate(dorayaki, [{ipv6_address, ipv6_address, optional}])),
+    ?assertEqual(undefined,
+                 application:get_env(dorayaki, ipv6_address)),
+
+    %% optional default
+    ?assertEqual(ok,
+                 validate(dorayaki, [{ipv6_address, ipv6_address, optional, {0,0,0,0,0,0,0,1}}])),
+    ?assertEqual({ok, {0,0,0,0,0,0,0,1}},
+                 application:get_env(dorayaki, ipv6_address)),
+
+    application:set_env(dorayaki, ipv6_address, "2001:e42:102:1527:160:16:103:161"),
+    ?assertEqual(ok,
+                 validate(dorayaki, [{ipv6_address, ipv6_address, required}])),
+
+    ?assertEqual(ok,
+                 application:unset_env(dorayaki, ip_address)),
+    ok.
+
+
 validate_type_port_number_test() ->
     %% optional
     ?assertEqual(ok,

@@ -4,7 +4,7 @@
 -export([format_error/1]).
 
 -type key() :: atom().
--type type() :: string | {integer, integer(), integer()} | ipv4_address | host | port_number | boolean | http_uri | list_http_uri | list_to_binary.
+-type type() :: string | {integer, integer(), integer()} | ipv4_address | ipv6_address |  host | port_number | boolean | http_uri | list_http_uri | list_to_binary.
 -type required() :: required | optional.
 
 
@@ -55,6 +55,8 @@ validate_type({integer, Min, Max}, Value) ->
     validate_integer(Value, Min, Max);
 validate_type(ipv4_address, Value) ->
     validate_ipv4_address(Value);
+validate_type(ipv6_address, Value) ->
+    validate_ipv6_address(Value);
 validate_type(ipv4_address_and_port_number, Value) ->
     validate_ipv4_address_and_port_number(Value);
 validate_type(list_ipv4_address_and_port_number, Value) ->
@@ -94,7 +96,16 @@ validate_integer(_Value, _Min, _Max) ->
 
 
 validate_ipv4_address(Value) ->
-    case inet_parse:ipv4strict_address(Value) of
+    case inet:parse_ipv4strict_address(Value) of
+        {ok, IPAddress} ->
+            {ok, IPAddress};
+        {error, _Reason} ->
+            badarg
+    end.
+
+
+validate_ipv6_address(Value) ->
+    case inet:parse_ipv6strict_address(Value) of
         {ok, IPAddress} ->
             {ok, IPAddress};
         {error, _Reason} ->
@@ -107,7 +118,7 @@ validate_ipv4_address_and_port_number(Value) when is_list(Value) ->
 validate_ipv4_address_and_port_number(Value) when is_binary(Value) ->
     case binary:split(Value, <<":">>) of
         [RawIPAddress, RawPort] ->
-            case inet_parse:ipv4strict_address(binary_to_list(RawIPAddress)) of
+            case inet:parse_ipv4strict_address(binary_to_list(RawIPAddress)) of
                 {ok, IPAddress} ->
                     try binary_to_integer(RawPort) of
                         Port when 0 =< Port andalso Port =< 65535 ->
