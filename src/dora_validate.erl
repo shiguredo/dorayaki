@@ -4,7 +4,9 @@
 -export([format_error/1]).
 
 -type key() :: atom().
--type type() :: string | {integer, integer(), integer()} | ipv4_address | ipv6_address |  host | port_number | boolean | http_uri | list_http_uri | list_to_binary.
+-type type() :: string | {integer, integer(), integer()} |
+                ipv4_address | ipv6_address |  host | port_number |
+                boolean | http_uri | list_http_uri | list_to_binary.
 -type required() :: required | optional.
 
 
@@ -186,7 +188,7 @@ validate_list_http_uri([Value|Rest]) ->
 
 
 
--spec format_error(term()) -> string(). 
+-spec format_error(term()) -> string().
 format_error({unknown_type, Type, Value}) ->
     io_lib:format("CONFIG-BAD-VALUE | type=~s, value=~p", [Type, Value]);
 format_error({badarg, Key, _Type, Value}) ->
