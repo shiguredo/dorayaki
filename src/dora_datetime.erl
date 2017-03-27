@@ -3,8 +3,7 @@
 -export([timestamp/0, timestamp/1, timestamp/2]).
 -export([year/1, month/1, day/1,
          hour/1, minute/1, second/1, micro_second/1, tz_offset/1]).
--export([timestamp_to_datetime/1, timestamp_to_gregorian_seconds/1]).
--export([iso8601/1, iso8601_no_micros/1, iso8601_no_millis/1, yyyymmdd/1]).
+-export([timestamp_to_datetime/1, timestamp_to_gregorian_seconds/1]).  -export([iso8601/1, iso8601_no_micros/1, iso8601_no_millis/1, yyyymmdd/1]).
 -export([relativedelta/2]).
 
 -include("dora_datetime.hrl").
@@ -153,7 +152,7 @@ iso8601_no_micros(#dora_timestamp{
                      micro_second = MicroSecs,
                      tz_designator = TzDesignator
                     }) ->
-    Milli = erlang:round(MicroSecs / 1000),
+    Milli = erlang:round(MicroSecs / 1000) rem 1000,
     list_to_binary(io_lib:format("~4.10.0b-~2.10.0b-~2.10.0bT~2.10.0b:~2.10.0b:~2.10.0b.~3.10.0b~s",
                                  [Year, Month, Day, Hour, Minute, Second, Milli, TzDesignator])).
 
