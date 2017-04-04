@@ -66,27 +66,31 @@ validate_type_ipv4_address_test() ->
 validate_type_list_ipv4_address_test() ->
     %% optional
     ?assertEqual(ok,
-                 validate(dorayaki, [{listen_ipv4_address, liste_ipv4_address, optional}])),
+                 validate(dorayaki, [{listen_ipv4_address, {listen_ipv4_address, 1}, optional}])),
     ?assertEqual(undefined,
                  application:get_env(dorayaki, listen_ipv4_address)),
 
     %% optional default
     ?assertEqual(ok,
-                 validate(dorayaki, [{listen_ipv4_address, list_ipv4_address, optional, [{127,0,0,1}]}])),
+                 validate(dorayaki, [{listen_ipv4_address, {list_ipv4_address, 1}, optional, [{127,0,0,1}]}])),
     ?assertEqual({ok, [{127,0,0,1}]},
                  application:get_env(dorayaki, listen_ipv4_address)),
 
     application:set_env(dorayaki, listen_ipv4_address, ["127.0.0.1", "192.168.1.10"]),
     ?assertEqual(ok,
-                 validate(dorayaki, [{listen_ipv4_address, list_ipv4_address, required}])),
+                 validate(dorayaki, [{listen_ipv4_address, {list_ipv4_address, 1}, required}])),
+
+    application:set_env(dorayaki, listen_ipv4_address, ["127.0.0.1", "192.168.1.10"]),
+    ?assertEqual({error, {badarg, listen_ipv4_address, {list_ipv4_address, 3}, ["127.0.0.1", "192.168.1.10"]}},
+                 validate(dorayaki, [{listen_ipv4_address, {list_ipv4_address, 3}, required}])),
 
     application:set_env(dorayaki, listen_ipv4_address, ["abc"]),
-    ?assertEqual({error, {badarg, listen_ipv4_address, list_ipv4_address, ["abc"]}},
-                 validate(dorayaki, [{listen_ipv4_address, list_ipv4_address, required}])),
+    ?assertEqual({error, {badarg, listen_ipv4_address, {list_ipv4_address, 1}, ["abc"]}},
+                 validate(dorayaki, [{listen_ipv4_address, {list_ipv4_address, 1}, required}])),
 
     application:set_env(dorayaki, listen_ipv4_address, ["::1"]),
-    ?assertEqual({error, {badarg, listen_ipv4_address, list_ipv4_address, ["::1"]}},
-                 validate(dorayaki, [{listen_ipv4_address, list_ipv4_address, required}])),
+    ?assertEqual({error, {badarg, listen_ipv4_address, {list_ipv4_address, 1}, ["::1"]}},
+                 validate(dorayaki, [{listen_ipv4_address, {list_ipv4_address, 1}, required}])),
 
     ?assertEqual(ok,
                  application:unset_env(dorayaki, listen_ipv4_address)),
@@ -118,19 +122,24 @@ validate_type_ipv6_address_test() ->
 validate_type_list_ipv6_address_test() ->
     %% optional
     ?assertEqual(ok,
-                 validate(dorayaki, [{listen_ipv6_address, list_ipv6_address, optional}])),
+                 validate(dorayaki, [{listen_ipv6_address, {list_ipv6_address, 1}, optional}])),
     ?assertEqual(undefined,
                  application:get_env(dorayaki, listen_ipv6_address)),
 
     %% optional default
     ?assertEqual(ok,
-                 validate(dorayaki, [{listen_ipv6_address, list_ipv6_address, optional, [{0,0,0,0,0,0,0,1}]}])),
+                 validate(dorayaki, [{listen_ipv6_address, {list_ipv6_address, 1}, optional, [{0,0,0,0,0,0,0,1}]}])),
     ?assertEqual({ok, [{0,0,0,0,0,0,0,1}]},
                  application:get_env(dorayaki, listen_ipv6_address)),
 
     application:set_env(dorayaki, listen_ipv6_address, ["2001:e42:102:1527:160:16:103:161", "::1"]),
     ?assertEqual(ok,
-                 validate(dorayaki, [{listen_ipv6_address, list_ipv6_address, required}])),
+                 validate(dorayaki, [{listen_ipv6_address, {list_ipv6_address, 0}, required}])),
+
+    application:set_env(dorayaki, listen_ipv6_address, ["2001:e42:102:1527:160:16:103:161", "::1"]),
+    ?assertEqual({error, {badarg, listen_ipv6_address, {list_ipv6_address, 3},
+                          ["2001:e42:102:1527:160:16:103:161", "::1"]}},
+                 validate(dorayaki, [{listen_ipv6_address, {list_ipv6_address, 3}, required}])),
 
     ?assertEqual(ok,
                  application:unset_env(dorayaki, ip_address)),
