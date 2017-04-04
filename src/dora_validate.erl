@@ -57,12 +57,12 @@ validate_type({integer, Min, Max}, Value) ->
     validate_integer(Value, Min, Max);
 validate_type(ipv4_address, Value) ->
     validate_ipv4_address(Value);
-validate_type(list_ipv4_address, Value) ->
-    validate_list_ipv4_address(Value);
+validate_type({list_ipv4_address, Min}, Value) ->
+    validate_list_ipv4_address(Value, Min);
 validate_type(ipv6_address, Value) ->
     validate_ipv6_address(Value);
-validate_type(list_ipv6_address, Value) ->
-    validate_list_ipv6_address(Value);
+validate_type({list_ipv6_address, Min}, Value) ->
+    validate_list_ipv6_address(Value, Min);
 validate_type(ipv4_address_and_port_number, Value) ->
     validate_ipv4_address_and_port_number(Value);
 validate_type(list_ipv4_address_and_port_number, Value) ->
@@ -110,17 +110,17 @@ validate_ipv4_address(Value) ->
     end.
 
 
-validate_list_ipv4_address(Value) when is_list(Value) ->
-    validate_list_ipv4_address(Value, []);
-validate_list_ipv4_address(Value) ->
-    validate_list_ipv4_address(Value, []).
+validate_list_ipv4_address(Value, Min) when is_list(Value) andalso length(Value) >= Min ->
+    validate_list_ipv4_address0(Value, []);
+validate_list_ipv4_address(_Value, _Min) ->
+    badarg.
 
-validate_list_ipv4_address([], Acc) ->
+validate_list_ipv4_address0([], Acc) ->
     {ok, lists:reverse(Acc)};
-validate_list_ipv4_address([Value|Rest], Acc) ->
+validate_list_ipv4_address0([Value|Rest], Acc) ->
     case validate_ipv4_address(Value) of
         {ok, IpAddress} ->
-            validate_list_ipv4_address(Rest, [IpAddress|Acc]);
+            validate_list_ipv4_address0(Rest, [IpAddress|Acc]);
         badarg ->
             badarg
     end.
@@ -135,17 +135,17 @@ validate_ipv6_address(Value) ->
     end.
 
 
-validate_list_ipv6_address(Value) when is_list(Value) ->
-    validate_list_ipv6_address(Value, []);
-validate_list_ipv6_address(_Value) ->
+validate_list_ipv6_address(Value, Min) when is_list(Value) andalso length(Value) >= Min ->
+    validate_list_ipv6_address0(Value, []);
+validate_list_ipv6_address(_Value, _Min) ->
     badarg.
 
-validate_list_ipv6_address([], Acc) ->
+validate_list_ipv6_address0([], Acc) ->
     {ok, lists:reverse(Acc)};
-validate_list_ipv6_address([Value|Rest], Acc) ->
+validate_list_ipv6_address0([Value|Rest], Acc) ->
     case validate_ipv6_address(Value) of
         {ok, IpAddress} ->
-            validate_list_ipv6_address(Rest, [IpAddress|Acc]);
+            validate_list_ipv6_address0(Rest, [IpAddress|Acc]);
         badarg ->
             badarg
     end.
