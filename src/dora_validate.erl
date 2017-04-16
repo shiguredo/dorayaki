@@ -4,7 +4,7 @@
 -export([format_error/1]).
 
 -type key() :: atom().
--type type() :: string | {integer, integer(), integer()} |
+-type type() :: string | list_string | {integer, integer(), integer()} |
                 ipv4_address | list_ipv4_address | ipv6_address | list_ipv6_address |
                 host | port_number | boolean | http_uri | list_http_uri | list_to_binary.
 -type required() :: required | optional.
@@ -53,6 +53,8 @@ validate0(Application, Rest, Key, Type, Value) ->
 
 validate_type(string, Value) ->
     validate_string(Value);
+validate_type(list_string, Value) ->
+    validate_list_string(Value);
 validate_type({integer, Min, Max}, Value) ->
     validate_integer(Value, Min, Max);
 validate_type(ipv4_address, Value) ->
@@ -199,7 +201,20 @@ validate_string(_Value) ->
     badarg.
 
 
--include_lib("eunit/include/eunit.hrl").
+validate_list_string(Value) when is_list(Value) ->
+    F = fun(V) when is_list(V) ->
+                true;
+           (_V) ->
+                false
+        end,
+    case lists:all(F, Value) of
+        true ->
+            ok;
+        false ->
+            badarg
+    end;
+validate_list_string(_Value) ->
+    badarg.
 
 
 validate_http_uri(Value) ->
@@ -222,7 +237,6 @@ validate_list_http_uri([Value|Rest]) ->
         badarg ->
             badarg
     end.
-
 
 
 -spec format_error(term()) -> string().
