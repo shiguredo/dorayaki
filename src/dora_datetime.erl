@@ -83,7 +83,7 @@ relativedelta(_Timestamp, {microseconds, _Value}) ->
 
 
 
--spec time_zone(atom()) -> binary().
+-spec time_zone(atom()) -> {integer(), binary()}.
 time_zone(?DORA_TZ_UTC) ->
     {0, <<"Z">>};
 time_zone(?DORA_TZ_JST) ->
@@ -135,7 +135,8 @@ datetime_to_timestamp({{Year, Month, Day}, {Hour, Minute, Second}}) ->
                     day = Day,
                     hour = Hour,
                     minute = Minute,
-                    second = Second}.
+                    second = Second,
+                    micro_second = 0}.
 
 
 timestamp_to_gregorian_seconds(Timestamp) when is_record(Timestamp, dora_timestamp) ->
@@ -180,15 +181,21 @@ iso8601_to_timestamp(Binary) ->
                     TimeRegExp = <<"^(\\d{2})\:*(\\d{2})\:*(\\d{2})([\.\,]\\d{3,6})?(\.*)$">>,
                     case re:run(TimeAndTz, TimeRegExp, [{capture, all_but_first, binary}]) of
                         {match, [HourBin, MinuteBin, SecondBin, <<>>, Tz]} ->
-                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<"0">>, Tz)};
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin,
+                                                      HourBin, MinuteBin, SecondBin, <<"0">>, Tz)};
                         {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MilliSecondBin:3/binary>>, Tz]} ->
-                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, <<MilliSecondBin/binary, "000">>, Tz)};
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin,
+                                                      HourBin, MinuteBin, SecondBin,
+                                                      <<MilliSecondBin/binary, "000">>, Tz)};
                         {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:4/binary>>, Tz]} ->
-                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin,
+                                                      HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
                         {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:5/binary>>, Tz]} ->
-                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin,
+                                                      HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
                         {match, [HourBin, MinuteBin, SecondBin, <<_:1/binary, MicroSecondBin:6/binary>>, Tz]} ->
-                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin, HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
+                            {ok, iso8601_to_timestamp(YearBin, MonthBin, DayBin,
+                                                      HourBin, MinuteBin, SecondBin, MicroSecondBin, Tz)};
                         _ ->
                             {error, {unsupported_time_format, TimeAndTz}}
                     end;

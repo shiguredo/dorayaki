@@ -4,7 +4,9 @@
 -export([format_error/1]).
 
 -type key() :: atom().
--type type() :: string | {integer, integer(), integer()} | ipv4_address | host | port_number | boolean | http_uri | list_http_uri | list_to_binary.
+-type type() :: string | list_string | {integer, integer(), integer()} |
+                ipv4_address | list_ipv4_address | ipv6_address | list_ipv6_address |
+                host | port_number | boolean | http_uri | list_http_uri | list_to_binary.
 -type required() :: required | optional.
 
 
@@ -51,10 +53,18 @@ validate0(Application, Rest, Key, Type, Value) ->
 
 validate_type(string, Value) ->
     validate_string(Value);
+validate_type(list_string, Value) ->
+    validate_list_string(Value);
 validate_type({integer, Min, Max}, Value) ->
     validate_integer(Value, Min, Max);
 validate_type(ipv4_address, Value) ->
     validate_ipv4_address(Value);
+validate_type({list_ipv4_address, Min}, Value) ->
+    validate_list_ipv4_address(Value, Min);
+validate_type(ipv6_address, Value) ->
+    validate_ipv6_address(Value);
+validate_type({list_ipv6_address, Min}, Value) ->
+    validate_list_ipv6_address(Value, Min);
 validate_type(ipv4_address_and_port_number, Value) ->
     validate_ipv4_address_and_port_number(Value);
 validate_type(list_ipv4_address_and_port_number, Value) ->
@@ -94,24 +104,66 @@ validate_integer(_Value, _Min, _Max) ->
 
 
 validate_ipv4_address(Value) ->
-    case inet_parse:ipv4strict_address(Value) of
-        {ok, IPAddress} ->
-            {ok, IPAddress};
+    case inet:parse_ipv4strict_address(Value) of
+        {ok, IpAddress} ->
+            {ok, IpAddress};
         {error, _Reason} ->
             badarg
     end.
+
+
+validate_list_ipv4_address(Value, Min) when is_list(Value) andalso length(Value) >= Min ->
+    validate_list_ipv4_address0(Value, []);
+validate_list_ipv4_address(_Value, _Min) ->
+    badarg.
+
+validate_list_ipv4_address0([], Acc) ->
+    {ok, lists:reverse(Acc)};
+validate_list_ipv4_address0([Value|Rest], Acc) ->
+    case validate_ipv4_address(Value) of
+        {ok, IpAddress} ->
+            validate_list_ipv4_address0(Rest, [IpAddress|Acc]);
+        badarg ->
+            badarg
+    end.
+
+
+validate_ipv6_address(Value) ->
+    case inet:parse_ipv6strict_address(Value) of
+        {ok, IpAddress} ->
+            {ok, IpAddress};
+        {error, _Reason} ->
+            badarg
+    end.
+
+
+validate_list_ipv6_address(Value, Min) when is_list(Value) andalso length(Value) >= Min ->
+    validate_list_ipv6_address0(Value, []);
+validate_list_ipv6_address(_Value, _Min) ->
+    badarg.
+
+validate_list_ipv6_address0([], Acc) ->
+    {ok, lists:reverse(Acc)};
+validate_list_ipv6_address0([Value|Rest], Acc) ->
+    case validate_ipv6_address(Value) of
+        {ok, IpAddress} ->
+            validate_list_ipv6_address0(Rest, [IpAddress|Acc]);
+        badarg ->
+            badarg
+    end.
+
 
 
 validate_ipv4_address_and_port_number(Value) when is_list(Value) ->
     validate_ipv4_address_and_port_number(list_to_binary(Value));
 validate_ipv4_address_and_port_number(Value) when is_binary(Value) ->
     case binary:split(Value, <<":">>) of
-        [RawIPAddress, RawPort] ->
-            case inet_parse:ipv4strict_address(binary_to_list(RawIPAddress)) of
-                {ok, IPAddress} ->
+        [RawIpAddress, RawPort] ->
+            case inet:parse_ipv4strict_address(binary_to_list(RawIpAddress)) of
+                {ok, IpAddress} ->
                     try binary_to_integer(RawPort) of
                         Port when 0 =< Port andalso Port =< 65535 ->
-                            {ok, {IPAddress, Port}};
+                            {ok, {IpAddress, Port}};
                         _ ->
                             badarg
                     catch
@@ -149,7 +201,20 @@ validate_string(_Value) ->
     badarg.
 
 
--include_lib("eunit/include/eunit.hrl").
+validate_list_string(Value) when is_list(Value) ->
+    F = fun(V) when is_list(V) ->
+                true;
+           (_V) ->
+                false
+        end,
+    case lists:all(F, Value) of
+        true ->
+            ok;
+        false ->
+            badarg
+    end;
+validate_list_string(_Value) ->
+    badarg.
 
 
 validate_http_uri(Value) ->
@@ -174,8 +239,7 @@ validate_list_http_uri([Value|Rest]) ->
     end.
 
 
-
--spec format_error(term()) -> string(). 
+-spec format_error(term()) -> string().
 format_error({unknown_type, Type, Value}) ->
     io_lib:format("CONFIG-BAD-VALUE | type=~s, value=~p", [Type, Value]);
 format_error({badarg, Key, _Type, Value}) ->
