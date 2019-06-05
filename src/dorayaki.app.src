@@ -1,6 +1,6 @@
 {application, dorayaki,
  [
-  {description, ""},
+  {description, "dorayaki"},
   {vsn, "0.13.0"},
   {registered, []},
   {applications, [
